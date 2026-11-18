@@ -68,6 +68,21 @@ function Util.plural(count, singular, pluralForm)
 end
 
 --[[
+A short length of time: "45 seconds", "6 minutes", "2 hours 5 minutes".
+]]
+function Util.formatDuration(seconds)
+  seconds = math.floor(tonumber(seconds) or 0)
+  if seconds < 0 then seconds = 0 end
+  if seconds < 60 then return seconds .. (seconds == 1 and ' second' or ' seconds') end
+  local minutes = math.floor(seconds / 60)
+  if minutes < 60 then return Util.plural(minutes, 'minute') end
+  local hours = math.floor(minutes / 60)
+  minutes = minutes % 60
+  if minutes == 0 then return Util.plural(hours, 'hour') end
+  return hours .. (hours == 1 and ' hour ' or ' hours ') .. minutes .. (minutes == 1 and ' minute' or ' minutes')
+end
+
+--[[
 Converts a Lua format string such as LOOT_ITEM_SELF ("You receive loot: %s.")
 into an anchored pattern that captures %s and %d. Magic characters are escaped
 so localized strings with parentheses or dashes still match.

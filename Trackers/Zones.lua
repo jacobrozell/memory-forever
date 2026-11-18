@@ -19,7 +19,7 @@ local Safe = ns.Safe
 local DEBOUNCE = 300
 local CHECK_DELAY = 0.5
 
-local Zones = { current = {}, recent = {}, pending = false }
+local Zones = { current = {}, recent = {}, pending = false, dwell = nil }
 ns.Zones = Zones
 
 local function verbs(subject)
@@ -51,9 +51,28 @@ function Zones.location()
   return zone, subZone
 end
 
+--[[
+Adds the time since the last check to the place being left, and to the
+character's observed play time. Called from zone checks and from a death,
+so there is no repeating timer.
+]]
+function Zones.account()
+  local dwell = Zones.dwell
+  if not ns.Repository.isReady() or not dwell or not dwell.at or not dwell.zone then return end
+  local elapsed = math.floor(ns.Events.now() - dwell.at)
+  if elapsed < 1 then return end
+  if elapsed > 86400 then elapsed = 86400 end
+  ns.Repository.addPlaceTime(dwell.zone, dwell.subZone, elapsed)
+  local char = ns.Repository.char()
+  if char then char.observed = (tonumber(char.observed) or 0) + elapsed end
+  dwell.at = ns.Events.now()
+end
+
 function Zones.check()
   Zones.pending = false
-  if not ns.Repository.isReady() or not canRecord() then return end
+  if not ns.Repository.isReady() then return end
+  Zones.account()
+  if not canRecord() then return end
 
   local zone, subZone = Zones.location()
   if not zone then return end
@@ -66,6 +85,9 @@ function Zones.check()
       zonePrevious = ns.record({
         category = 'zones', path = { zone }, interaction = 'visit', verbs = verbs(zone),
       })
+      if zonePrevious and zonePrevious.x < 1 and ns.Forever then
+        ns.Forever.say(ns.Forever.zoneSentence(zone))
+      end
     end
   end
 
@@ -81,6 +103,12 @@ function Zones.check()
     Zones.current.subZone = nil
     if zonePrevious then ns.Reminders.placeReturn(zone, zone, nil, zonePrevious) end
   end
+
+  if not Zones.dwell or Zones.dwell.zone ~= zone or Zones.dwell.subZone ~= subZone then
+    Zones.dwell = { zone = zone, subZone = subZone, at = ns.Events.now() }
+  end
+  if ns.Runs then ns.Runs.sync() end
+  if ns.Camps then ns.Camps.check() end
 end
 
 function Zones.schedule()

@@ -1,8 +1,10 @@
-# API audit: upstream Memory 1.6.0 → WoW: Forever
+# API audit
+
+Memory Forever, by Jacob Rozell, compared with Adriano Castro's Memory 1.6.0 ([github.com/adrianocastro189/memory](https://github.com/adrianocastro189/memory)).
 
 Verdicts: ✅ works as-is · 🔁 swapped to a modern API · 🧱 redesigned · ❌ dropped · 🛡 kept behind a guard.
 
-"Verified" means verified in the stubbed-client tests (`tests/`). **Nothing here has been verified in the live Forever client yet.** Use the in-game checklist in the README for that.
+"Verified" means verified in the stubbed-client tests (`tests/`). Load, reload, logout, zones, return pop-ups, open-world loot, item tooltips, vendors, fights, deaths, and the options panel were also checked on the live Forever client. Dungeons are not confirmed yet.
 
 ## Events
 

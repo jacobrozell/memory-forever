@@ -15,11 +15,29 @@ local ECHO = 30
 local Deaths = { lastAt = nil, alive = true }
 ns.Deaths = Deaths
 
+local STREAK = 300
+
+local function noteStreak()
+  if ns.Zones.account then ns.Zones.account() end
+  if ns.Runs then ns.Runs.noteDeath() end
+  local char = ns.Repository.char()
+  if not char then return end
+  local observed = tonumber(char.observed) or 0
+  local since = tonumber(char.observedAtDeath)
+  local streak = since and math.max(0, observed - since) or observed
+  char.observedAtDeath = observed
+  if streak < STREAK then return end
+  local text = 'You went ' .. ns.Util.formatDuration(streak) .. ' without dying.'
+  ns.print(text)
+  if ns.Settings.get('placeToasts') then ns.Toast.show('Death', text) end
+end
+
 local function record()
   ns.record({
     category = 'misc', path = { 'others' }, interaction = 'die',
     verbs = { past = 'died', present = 'die' },
   })
+  noteStreak()
 
   local zone, subZone = ns.Zones.location()
   if not zone then return end

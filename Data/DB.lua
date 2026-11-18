@@ -2,9 +2,10 @@
 SavedVariables initialization and schema migrations.
 
 MemoryForeverDB = {
-  schemaVersion = 2,
+  schemaVersion = 3,
   settings = { [name] = value },            -- account-wide, see Data/Settings.lua
-  moments  = { 'label', ... },              -- account-wide, index is stored in memories
+  moments  = { 'label', ... },              -- account-wide catalog; index is stored in memories
+                                            -- each character's currentMoment picks one label
   realms   = {
     [realmName] = {
       [playerGUID] = {
@@ -25,7 +26,8 @@ leaf = { first = MemoryString, last = MemoryString, x = count }
 Schema versions:
   0 - nothing saved yet
   1 - the original Memory addon (MemoryAddon_DataSet / MemoryAddon_Settings)
-  2 - Memory Forever 2.0
+  2 - Memory Forever 2.0, one current moment for the whole account
+  3 - current moment is per character (currentMoment on the character)
 
 The init is defensive: it runs on ADDON_LOADED and again on PLAYER_LOGIN, and
 repairs missing or mistyped tables instead of assuming the file loaded (the
@@ -36,7 +38,7 @@ local _, ns = ...
 local DB = {}
 ns.DB = DB
 
-DB.SCHEMA_VERSION = 2
+DB.SCHEMA_VERSION = 3
 
 local function ensureTable(parent, key)
   if type(parent[key]) ~= 'table' then parent[key] = {} end
@@ -119,6 +121,22 @@ DB.MIGRATIONS = {
     if imported > 0 then
       ns.pendingNotices = ns.pendingNotices or {}
       table.insert(ns.pendingNotices, 'Imported memories for ' .. ns.Util.plural(imported, 'character') .. ' from the original Memory addon.')
+    end
+  end,
+  -- The last label used to be current for every character. Keep that for
+  -- characters that already exist, then let each one move on its own.
+  [3] = function(db)
+    DB.ensureShape(db)
+    local count = #db.moments
+    if count < 1 then return end
+    for _, players in pairs(db.realms) do
+      if type(players) == 'table' then
+        for _, char in pairs(players) do
+          if type(char) == 'table' and char.currentMoment == nil then
+            char.currentMoment = count
+          end
+        end
+      end
     end
   end,
 }

@@ -94,12 +94,27 @@ function Reminders.placeReturn(place, zone, subZone, previous)
   if throttled('visit:' .. zone .. ':' .. (subZone or '')) then return false end
 
   local lines = { "You've been here " .. ns.Util.plural(previous.x + 1, 'time') .. '.' }
+  if previous.first and previous.first.level then
+    table.insert(lines, 'Your first visit was at level ' .. previous.first.level .. '.')
+  end
   if previous.last then
-    table.insert(lines, 'Last visit: ' .. ns.Util.relativeDate(previous.last.date) .. '.')
+    table.insert(lines, 'Your last visit was ' .. ns.Util.relativeDate(previous.last.date) .. '.')
+  end
+  local seconds = ns.Repository.placeSeconds(zone, subZone)
+  if seconds >= 60 then
+    table.insert(lines, 'You have spent ' .. ns.Util.formatDuration(seconds) .. ' here.')
+  end
+  local quests = ns.Repository.placeQuests(zone, subZone)
+  if quests > 0 then
+    table.insert(lines, 'You have turned in ' .. ns.Util.plural(quests, 'quest') .. ' here.')
   end
   local deaths = ns.Repository.get('deaths', { zone, subZone or zone }, 'die').x
   if deaths > 0 then
-    table.insert(lines, 'You died here ' .. ns.Util.plural(deaths, 'time') .. '.')
+    table.insert(lines, 'You have died here ' .. ns.Util.plural(deaths, 'time') .. '.')
+  end
+  local areas = ns.Repository.areasDiscovered(zone)
+  if areas > 0 then
+    table.insert(lines, 'You have discovered ' .. ns.Util.plural(areas, 'area') .. ' in ' .. zone .. '.')
   end
   ns.Toast.show(place, table.concat(lines, ' '))
   return true

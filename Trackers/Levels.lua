@@ -18,6 +18,7 @@ ns.Trackers.register('levels', {
       if ns.Settings.get('screenshotOnLevelUp') then
         ns.Reminders.screenshot(string.format('Reached level %d on %s', level, ns.Util.formatDate(snapshot.date)))
       end
+      if ns.Forever and ns.Forever.levels[level] then ns.Forever.say(ns.Forever.levels[level]) end
     end)
   end,
 })

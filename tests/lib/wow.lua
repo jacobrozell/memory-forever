@@ -95,6 +95,9 @@ function M.newClient(options)
     },
     bags = {},
     lootSlots = {},
+    buffs = {},
+    gear = {},
+    professions = {},
     invalidEvents = {},
     forbiddenEvents = { COMBAT_LOG_EVENT_UNFILTERED = true, COMBAT_LOG_EVENT = true },
     tooltipCallbacks = {},
@@ -236,7 +239,29 @@ function M.newClient(options)
   end
   env.UnitExists = function(unit) local d = unitData(unit) return d ~= nil and restrictedRead(unit, true) end
   env.UnitLevel = function(unit) if unit == 'player' then return ctl.level end local d = unitData(unit) return d and d.level or 0 end
-  env.UnitClass = function() return 'Warrior', 'WARRIOR', 1 end
+  env.UnitClass = function(unit)
+    local d = unitData(unit)
+    if d and d.class then return d.className or d.class, d.class, d.classId or 1 end
+    return 'Warrior', 'WARRIOR', 1
+  end
+  env.UnitRace = function(unit)
+    local d = unitData(unit)
+    if d and (d.race or d.raceFile) then return d.race or d.raceFile, d.raceFile or d.race end
+    if unit == 'player' then return 'Human', 'Human' end
+    return nil
+  end
+  env.GetProfessions = function()
+    local slots = {}
+    for i = 1, 4 do
+      if ctl.professions[i] then slots[i] = i end
+    end
+    return slots[1], slots[2], slots[3], slots[4]
+  end
+  env.GetProfessionInfo = function(index)
+    local profession = ctl.professions[index]
+    if not profession then return nil end
+    return profession.name, nil, profession.rank, 300
+  end
   env.UnitCanAttack = function(_, unit) local d = unitData(unit) return d and restrictedRead(unit, d.canAttack and true or false) end
   env.UnitIsUnit = function(a, b)
     local da, db = unitData(a), unitData(b)
@@ -247,6 +272,18 @@ function M.newClient(options)
   env.IsFlying = function() return ctl.flying end
   env.InCombatLockdown = function() return ctl.inCombat end
   env.IsInInstance = function() return ctl.inInstance, ctl.inInstance and 'party' or 'none' end
+  env.UnitAura = function(unit, index)
+    if unit ~= 'player' then return nil end
+    local buff = ctl.buffs[index]
+    if not buff then return nil end
+    return buff.name, nil, nil, nil, nil, nil, nil, nil, nil, buff.id
+  end
+  env.GetInventoryItemLink = function(unit, slot)
+    if unit ~= 'player' then return nil end
+    local item = ctl.gear[slot]
+    if not item then return nil end
+    return '|cff0070dd|Hitem:' .. tostring(item.id or 0) .. '|h[' .. item.name .. ']|h|r'
+  end
   env.IsInRaid = function() return ctl.raid end
   env.GetNumGroupMembers = function() return ctl.groupSize or 0 end
   env.GetNumSubgroupMembers = function() return math.max(0, (ctl.groupSize or 0) - 1) end
@@ -263,6 +300,8 @@ function M.newClient(options)
   env.GetCursorPosition = function() return 600, 400 end
   env.geterrorhandler = function() return function(err) table.insert(ctl.errors, err) end end
 
+  env.ERR_ZONE_EXPLORED = 'Discovered: %s'
+  env.ERR_ZONE_EXPLORED_XP = 'Discovered %s: %d experience gained'
   env.LOOT_ITEM_SELF = 'You receive loot: %s.'
   env.LOOT_ITEM_SELF_MULTIPLE = 'You receive loot: %sx%d.'
   env.GetNumLootItems = function() return #ctl.lootSlots end

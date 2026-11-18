@@ -1,7 +1,7 @@
 ## Interface: 16001
 ## Title: Memory Forever |cffffee772.0.0-alpha.1|r
-## Notes: Remembers what you do in the world and reminds you of it. Fork of Memory by Adriano Castro (Squareone189), ported to WoW: Forever.
-## Author: Jacob Rozell (fork); Adriano Castro (original Memory addon)
+## Notes: Remembers what you do in the world and reminds you of it. By Jacob Rozell, based on Memory by Adriano Castro.
+## Author: Jacob Rozell
 ## Version: 2.0.0-alpha.1
 ## SavedVariables: MemoryForeverDB, MemoryAddon_DataSet, MemoryAddon_Settings
 ## IconTexture: Interface\Icons\INV_Misc_Book_09
@@ -20,6 +20,7 @@ Data\Moments.lua
 Data\MemoryString.lua
 Data\Memory.lua
 Data\Repository.lua
+Data\Forever.lua
 
 View\Formatter.lua
 View\Toast.lua
@@ -35,6 +36,11 @@ Trackers\Npcs.lua
 Trackers\Fights.lua
 Trackers\Loot.lua
 Trackers\Group.lua
+Trackers\Runs.lua
+Trackers\Gear.lua
+Trackers\Camps.lua
+Trackers\Professions.lua
+Trackers\Discoveries.lua
 
 UI\Queries.lua
 UI\Journal.lua

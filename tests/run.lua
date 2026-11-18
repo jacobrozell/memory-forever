@@ -13,9 +13,12 @@ local SPECS = {
   'tests/spec/formatter_spec.lua',
   'tests/spec/zones_spec.lua',
   'tests/spec/trackers_spec.lua',
+  'tests/spec/story_spec.lua',
+  'tests/spec/forever_spec.lua',
   'tests/spec/secrets_spec.lua',
   'tests/spec/tooltip_spec.lua',
   'tests/spec/ui_spec.lua',
+  'tests/spec/gaps_spec.lua',
 }
 
 for _, spec in ipairs(SPECS) do

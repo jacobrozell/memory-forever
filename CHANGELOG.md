@@ -1,10 +1,35 @@
 # Changelog
 
-All notable changes to Memory Forever. Releases follow [semver](https://semver.org/). The original Memory addon's history is in the `upstream-1.6.0` tag and earlier tags.
+All notable changes to Memory Forever, by Jacob Rozell. Releases follow [semver](https://semver.org/). History from Adriano Castro's Memory, through 1.6.0, is in the `upstream-1.6.0` tag and earlier tags.
 
-## [2.0.0-alpha.1] - unreleased
+## [2.0.0-alpha.2] - unreleased
 
-First Memory Forever release: a port of Memory 1.6.0 by Adriano Castro to WoW: Forever. Not yet verified in the live client.
+### Changed
+- The current moment belongs to the character. Existing characters keep the moment that was current for the whole account. `/mem moment off` clears it.
+- The journal uses a flat dark panel, in the same style as Questie's tracker, instead of the stock dialog frame.
+
+### Added
+- Returning to a place also says how long you have spent there, how many quests you turned in, and your level on the first visit.
+- Dying after 5 minutes without a death says how long that stretch lasted.
+- Leaving a dungeon or raid records the run: how long it was, how many times you died, and who was with you.
+- The first time you equip an item. Gear you were already wearing is not counted.
+- Campfires, from the Camping buff, with the place and how many times.
+- Pop-ups wrap onto extra lines and stay up long enough to read. Journal tabs sit on two rows. Dates, tooltips, and reminder sentences are punctuated.
+- Campfires also remember the camp feature you sat by (a Sharpening Wheel, a Mana Well, and the other Forever camp objects) and who was at the fire with you. `/mem buffs` lists your current buffs when a feature name needs checking.
+- The first visit to Zephras Isle, the Riverglades, Shen'Dralas, and Mount Hyjal is named. So is the first run of each new Forever dungeon, Barrow Deeps, Hyjal Summit, and Onyxia's Lair.
+- Level 25, 45, and 60, and crafting skill 150, 225, and 300, are called out as Legacy milestones. The skill you already have at login is not.
+- The first Skyborne you group with, and the first human hunter, dwarf shaman, gnome priest, orc mage, troll warlock, or undead paladin.
+- Each area the client announces as discovered. Coming back to a zone says how many areas you have found there.
+
+### Waiting on a client check
+- A Hardcore death as one quiet line, once the ruleset is visible to addons.
+
+### Tested
+- 2026-11-18 08:48 CT. The stub suite is 141 passed. `tests/cover.py` measures 95.7% of the addon lines (2,308 of 2,411). Blank lines, comments, and closing braces are not counted.
+
+## [2.0.0-alpha.1] - 2026-11-17
+
+First Memory Forever release, by Jacob Rozell, based on Memory 1.6.0 by Adriano Castro. Checked on the live client for load, reload, logout, zones, return pop-ups, open-world loot, item tooltips, vendors, fights, deaths, and the options panel. Dungeons, grouping, level-up screenshots, and quest turn-ins are not confirmed yet.
 
 ### Changed
 - Renamed to **Memory Forever**. The folder is `MemoryForever`, the slash command is `/mem` (or `/memoryforever`) and the SavedVariable is `MemoryForeverDB`.

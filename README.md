@@ -6,9 +6,19 @@ A World of Warcraft: Forever addon that remembers what you do in the world and o
 >
 > **Goldshire**: You've been here 30 times. Last visit: 3 days ago. You died here 2 times.
 
-Memory Forever is a fork of **[Memory](https://github.com/adrianocastro189/memory)** by **Adriano Castro** ([Squareone189 on CurseForge](https://www.curseforge.com/wow/addons/memory)), ported to WoW: Forever and modernized. Development of the original paused in November 2024. All credit for the original idea and design goes to Adriano. If you enjoy this addon, consider [supporting the original author](https://github.com/sponsors/adrianocastro189).
+**Author:** Jacob Rozell
 
-> **Status: 2.0.0-alpha.1.** Fully tested against a stubbed Forever client, **not yet verified in the live game**. Please report Lua errors (BugSack output) in the issues.
+Memory Forever is my addon for WoW: Forever. It started from **[Memory](https://github.com/adrianocastro189/memory)** by **Adriano Castro** ([Squareone189 on CurseForge](https://www.curseforge.com/wow/addons/memory)). He paused that project in November 2024. The original idea and the 1.6.0 design are his. The Forever version, and everything after it, is mine.
+
+* Original: https://github.com/adrianocastro189/memory
+* This addon: https://github.com/jacobrozell/memory-forever
+* Original CurseForge page: https://www.curseforge.com/wow/addons/memory
+
+If you want to support Adriano: https://github.com/sponsors/adrianocastro189
+
+If you want to support me: https://buymeacoffee.com/jacobrozelq?status=1
+
+> **Status: 2.0.0-alpha.1.** Checked on the live Forever client for load, reload, logout, zones, return pop-ups, open-world loot, item tooltips, vendors, fights, deaths, and the options panel. Dungeons, grouping, level-up screenshots, and quest turn-ins are not confirmed yet. Please report Lua errors (BugSack output) in the issues.
 
 ## What it remembers
 
@@ -16,11 +26,17 @@ For each of these it stores how many times it happened and the first and last ti
 
 | | |
 |---|---|
-| **Places** | Every zone and subzone you enter. Returning within 5 minutes doesn't count twice. |
-| **Deaths** | How often you died, and where |
+| **Places** | Every zone and subzone you enter. Returning within 5 minutes doesn't count twice. Coming back also tells you how long you have spent there, how many quests you turned in, and what level you were on the first visit. |
+| **Deaths** | How often you died, and where. A death after at least 5 minutes without one says how long that stretch was. |
+| **Dungeons** | One memory when you leave: how long the run was, how many times you died, and who was with you. |
 | **Levels** | When and where you reached each level, with a screenshot |
 | **NPCs** | Talking, doing business (buy, sell, repair), turning in quests, and fights |
-| **Items** | Everything you loot |
+| **Items** | Everything you loot, and the first time you equip something |
+| **Campfires** | Each time you sit at a campfire, where, which camp features you sat by, and who was there with you |
+| **Forever places** | The first time you enter a new Forever zone, or finish a first run of a new Forever dungeon or raid |
+| **Legacy** | Level 25, 45, and 60, and crafting skill 150, 225, and 300 |
+| **New people** | The first Skyborne you group with, and the first of a race and class pair that is new in Forever |
+| **Exploration** | Each area the client announces the first time you find it, and how many you have found in a zone when you come back |
 | **Players** | Who you grouped with, counted once per day |
 | **Achievements** | A screenshot and a count, if the client has achievements |
 
@@ -35,8 +51,9 @@ Memories also show in NPC, player and item tooltips.
 | `/mem` | Open the journal: Zones, NPCs, Items, Players, Deaths, Levels, Moments, Here, Stats |
 | `/mem here` | Everything that happened in this place |
 | `/mem stats` | Deaths, places discovered, most visited place, most deaths, most grouped with... |
-| `/mem moment "Leveling with Sam"` | Start a new moment (alias: `addm`) |
-| `/mem moment` | Show the current moment (alias: `getm`) |
+| `/mem moment "Leveling with Sam"` | Set this character's moment (alias: `addm`) |
+| `/mem moment` | Show this character's moment (alias: `getm`) |
+| `/mem moment off` | Stop attaching a moment on this character |
 | `/mem options` | Options panel (also under Options > AddOns) |
 | `/mem settings` | List all settings |
 | `/mem set <key> <value>` / `/mem get <key>` | Change or read a setting |
@@ -47,7 +64,7 @@ Memories also show in NPC, player and item tooltips.
 
 ### Moments
 
-A moment is a label that gets attached to every memory you record while it's the current one. It could be something in real life ("playing in a motel while the apartment is ready") or something in the game ("Leveling with Sam"). Later reminders mention it:
+A moment is a label that gets attached to every memory you record while it's the current one. It could be something in real life ("playing in a motel while the apartment is ready") or something in the game ("Leveling with Sam"). The label list is shared by the account. The current moment belongs to this character, so another character can be in a different one. `/mem moment off` clears it. Later reminders mention it:
 
 > *The first time I looted a Linen Cloth was 41 days ago ~playing in a motel while the apartment is ready~*
 
@@ -81,7 +98,7 @@ Forever runs on the modern (Midnight-era) engine with its addon restrictions:
 ## Install
 
 1. Download the release and extract it so the folder is named `MemoryForever`.
-2. Put it in your Forever AddOns folder. During the beta this was `World of Warcraft/_classic_beta_/Interface/AddOns/`. Check where your live install keeps addons.
+2. Put it in your Forever AddOns folder: `World of Warcraft/_forever_/Interface/AddOns/`.
 3. Log in. You should see `Memory Forever: 2.0.0-alpha.1 loaded` in chat.
 
 ### Bringing memories from the original Memory addon
@@ -134,4 +151,4 @@ Install with BugGrabber and BugSack enabled, then:
 
 ## License
 
-GPLv3, same as the original. See [LICENSE](LICENSE). Copyright © 2021-2024 Adriano Castro (Memory), © 2026 Jacob Rozell (Memory Forever changes).
+GPLv3. See [LICENSE](LICENSE). Memory Forever © 2026 Jacob Rozell. The original Memory addon © 2021–2024 Adriano Castro.

@@ -67,10 +67,10 @@ local function build()
 
   local credit = panel:CreateFontString(nil, 'OVERLAY', 'GameFontDisableSmall')
   credit:SetPoint('TOPLEFT', title, 'BOTTOMLEFT', 0, -6)
-  credit:SetText('A fork of Memory by Adriano Castro. Slash command: /mem')
+  credit:SetText('By Jacob Rozell. Based on Memory by Adriano Castro. Slash command: /mem')
 
   local tooltips = addCheckbox(credit, -14, 'showInTooltips', 'Show memories in tooltips')
-  local places = addCheckbox(tooltips, -4, 'placeToasts', 'Pop-up when returning to a place or dying where you died before')
+  local places = addCheckbox(tooltips, -4, 'placeToasts', 'Story pop-ups for places, deaths, runs, gear, and campfires')
   local cooldown = addStepper(places, -8, 'placeToastCooldown', 'Same place pop-up cooldown (minutes)', 5, false)
   local levelShot = addCheckbox(cooldown, -12, 'screenshotOnLevelUp', 'Screenshot on level up')
   local achievementShot = addCheckbox(levelShot, -4, 'screenshotOnAchievement', 'Screenshot on achievement')

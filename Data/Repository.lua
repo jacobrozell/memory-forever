@@ -101,6 +101,73 @@ function Repository.store(category, path, interaction, x, snapshot)
 end
 
 --[[
+The place table for a zone, or for a subzone when one is given. Extra numbers
+on this table (time spent, quests handed in) sit beside the visit memory.
+]]
+function Repository.placeNode(zone, subZone, create)
+  if not current or not zone or zone == '' then return nil end
+  local path = { zone }
+  if subZone and subZone ~= '' and subZone ~= zone then
+    path = { zone, 'subzones', subZone }
+  end
+  local node = current.zones
+  if type(node) ~= 'table' then return nil end
+  for i = 1, #path do
+    local key = path[i]
+    local nextNode = node[key]
+    if isLeaf(nextNode) then return nil end
+    if type(nextNode) ~= 'table' then
+      if not create then return nil end
+      nextNode = {}
+      node[key] = nextNode
+    end
+    node = nextNode
+  end
+  return node
+end
+
+function Repository.addPlaceTime(zone, subZone, seconds)
+  seconds = math.floor(tonumber(seconds) or 0)
+  if seconds < 1 then return end
+  local node = Repository.placeNode(zone, subZone, true)
+  if not node then return end
+  node.seconds = (tonumber(node.seconds) or 0) + seconds
+end
+
+function Repository.placeSeconds(zone, subZone)
+  local node = Repository.placeNode(zone, subZone, false)
+  return node and tonumber(node.seconds) or 0
+end
+
+function Repository.addPlaceQuests(zone, subZone, count)
+  local node = Repository.placeNode(zone, subZone, true)
+  if not node then return end
+  node.quests = (tonumber(node.quests) or 0) + (count or 1)
+end
+
+function Repository.placeQuests(zone, subZone)
+  local node = Repository.placeNode(zone, subZone, false)
+  return node and tonumber(node.quests) or 0
+end
+
+--[[
+How many named areas this character has discovered in a zone.
+]]
+function Repository.areasDiscovered(zone)
+  if not current or type(current.zones) ~= 'table' or not zone then return 0 end
+  local zoneNode = current.zones[zone]
+  local bag = type(zoneNode) == 'table' and not isLeaf(zoneNode) and zoneNode.discoveries
+  if type(bag) ~= 'table' or isLeaf(bag) then return 0 end
+  local count = 0
+  for _, node in pairs(bag) do
+    if type(node) == 'table' and isLeaf(node.discover) and node.discover.x > 0 then
+      count = count + 1
+    end
+  end
+  return count
+end
+
+--[[
 All memories stored directly under a path (one per interaction type).
 ]]
 function Repository.list(category, path)

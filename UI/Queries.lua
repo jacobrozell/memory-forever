@@ -28,13 +28,16 @@ Queries.SORT_LABELS = { count = 'Most', recent = 'Recent', name = 'A-Z' }
 local INTERACTION_WORDS = {
   talk = 'talked', business = 'business', fight = 'fought', quest = 'quests',
   party = 'grouped', loot = 'looted', visit = 'visited', die = 'died',
-  login = 'logins', earn = 'earned',
+  login = 'logins', earn = 'earned', camp = 'camped', equip = 'equipped', run = 'ran',
+  feature = 'sat by', campfire = 'camped with', meet = 'met', discover = 'discovered',
 }
 
 -- past-tense phrases for the per-place timeline
 local TIMELINE_WORDS = {
   talk = 'spoke with', business = 'did business with', fight = 'fought', quest = 'turned in a quest to',
   party = 'grouped with', loot = 'looted', die = 'died', login = 'logged in', earn = 'earned',
+  camp = 'camped at', equip = 'equipped', run = 'ran through',
+  feature = 'sat by', campfire = 'camped with', meet = 'grouped with a', discover = 'discovered',
 }
 
 local function earlier(a, b)
@@ -76,7 +79,9 @@ local LABELERS = {
   zones = function(memory)
     local path = memory.path
     if #path == 1 then return path[1] end
-    if #path == 3 and path[2] == 'subzones' then return path[3] .. ', ' .. path[1] end
+    if #path == 3 and (path[2] == 'subzones' or path[2] == 'discoveries') then
+      return path[3] .. ', ' .. path[1]
+    end
     return nil
   end,
   deaths = function(memory)
@@ -119,19 +124,24 @@ end
 local function stamp(snapshot)
   if not snapshot then return '?' end
   local text = Util.formatDate(snapshot.date, true)
-  if snapshot.level then text = text .. ' (lv ' .. snapshot.level .. ')' end
+  if snapshot.level then text = text .. ' (level ' .. snapshot.level .. ')' end
   return text
 end
 
 function Queries.formatEntry(entry)
   local parts = {}
   for interaction, x in pairs(entry.parts) do
-    table.insert(parts, (INTERACTION_WORDS[interaction] or interaction) .. ' ' .. x)
+    local word = INTERACTION_WORDS[interaction] or interaction
+    if interaction == 'quest' then
+      table.insert(parts, Util.plural(x, 'quest'))
+    else
+      table.insert(parts, word .. ' ' .. Util.plural(x, 'time'))
+    end
   end
   table.sort(parts)
   local line = ns.highlight(entry.label) .. '  ' .. table.concat(parts, ', ')
-  local meta = 'first ' .. stamp(entry.first)
-  if entry.x > 1 and entry.last then meta = meta .. ' - last ' .. Util.relativeDate(entry.last.date) end
+  local meta = 'First ' .. stamp(entry.first) .. '.'
+  if entry.x > 1 and entry.last then meta = meta .. ' Last ' .. Util.relativeDate(entry.last.date) .. '.' end
   return line .. '\n    ' .. ns.muted(meta)
 end
 
@@ -151,8 +161,9 @@ end
 local function momentLines()
   local lines = {}
   local moments = ns.Moments.all()
+  local current = ns.Moments.currentIndex()
   for i = #moments, 1, -1 do
-    local marker = i == #moments and ns.highlight(' (current)') or ''
+    local marker = i == current and ns.highlight(' (current)') or ''
     table.insert(lines, i .. '. ' .. moments[i] .. marker)
   end
   return lines
@@ -171,10 +182,10 @@ function Queries.here(zone, subZone)
   local visitPath = subZone and { zone, 'subzones', subZone } or { zone }
   local visits = Repository.get('zones', visitPath, 'visit')
   local deaths = Repository.get('deaths', { zone, subZone or zone }, 'die')
-  local summary = 'Visited ' .. Util.plural(visits.x, 'time')
-  if visits.first then summary = summary .. ', first on ' .. stamp(visits.first) end
-  if deaths.x > 0 then summary = summary .. '. Died here ' .. Util.plural(deaths.x, 'time') end
-  table.insert(lines, summary .. '.')
+  local summary = 'Visited ' .. Util.plural(visits.x, 'time') .. '.'
+  if visits.first then summary = summary .. ' The first visit was on ' .. stamp(visits.first) .. '.' end
+  if deaths.x > 0 then summary = summary .. ' Died here ' .. Util.plural(deaths.x, 'time') .. '.' end
+  table.insert(lines, summary)
 
   local events = {}
   local function consider(memory, snapshot, which)
@@ -188,6 +199,12 @@ function Queries.here(zone, subZone)
       if memory.x > 1 then consider(memory, memory.last, 'last') end
     end)
   end
+  Repository.walk('zones', function(memory)
+    if memory.interaction == 'camp' or memory.interaction == 'run' or memory.interaction == 'discover' then
+      consider(memory, memory.first, 'first')
+      if memory.x > 1 then consider(memory, memory.last, 'last') end
+    end
+  end)
   for _, level in ipairs(Repository.levels()) do
     if level.zone == zone and (subZone == nil or level.subZone == subZone) then
       table.insert(events, { snapshot = ns.MemoryString.new(level), level = level.level })
@@ -206,7 +223,7 @@ function Queries.here(zone, subZone)
       text = (event.which == 'first' and 'First time I ' or 'Last time I ') .. word
         .. (subject ~= '' and (' ' .. ns.highlight(subject)) or '')
     end
-    table.insert(lines, ns.muted(Util.formatDate(event.snapshot.date, true)) .. '  ' .. text)
+    table.insert(lines, ns.muted(Util.formatDate(event.snapshot.date, true)) .. '  ' .. text .. '.')
   end
   return lines, place
 end
@@ -217,11 +234,13 @@ Totals for the stats view.
 function Queries.stats()
   local stats = {
     deaths = Repository.get('misc', { 'others' }, 'die').x,
-    zones = 0, subzones = 0, npcs = 0, fights = 0, talks = 0, quests = 0,
+    zones = 0, subzones = 0, areas = 0, npcs = 0, fights = 0, talks = 0, quests = 0,
     itemKinds = 0, itemsLooted = 0, players = 0, levels = #Repository.levels(),
   }
   local mostVisited, deadliest, mostGrouped
   Repository.walk('zones', function(memory)
+    if memory.interaction == 'discover' then stats.areas = stats.areas + 1 end
+    if memory.interaction ~= 'visit' then return end
     if #memory.path == 1 then
       stats.zones = stats.zones + 1
     else
@@ -240,16 +259,24 @@ function Queries.stats()
     if memory.interaction == 'quest' then stats.quests = stats.quests + memory.x end
   end)
   for _ in pairs(npcs) do stats.npcs = stats.npcs + 1 end
+  local kinds = {}
   Repository.walk('items', function(memory)
-    stats.itemKinds = stats.itemKinds + 1
-    stats.itemsLooted = stats.itemsLooted + memory.x
+    if memory.interaction == 'loot' or memory.interaction == 'equip' then
+      kinds[memory.path[1]] = true
+    end
+    if memory.interaction == 'loot' then
+      stats.itemsLooted = stats.itemsLooted + memory.x
+    end
   end)
+  for _ in pairs(kinds) do stats.itemKinds = stats.itemKinds + 1 end
+  local people = {}
   Repository.walk('players', function(memory)
-    stats.players = stats.players + 1
+    people[memory.path[1]] = true
     if memory.interaction == 'party' and (not mostGrouped or memory.x > mostGrouped.x) then
       mostGrouped = memory
     end
   end)
+  for _ in pairs(people) do stats.players = stats.players + 1 end
 
   if mostVisited then
     stats.mostVisited = { label = mostVisited.path[3] .. ', ' .. mostVisited.path[1], x = mostVisited.x }
@@ -268,12 +295,13 @@ end
 function Queries.statsLines()
   local s = Queries.stats()
   local lines = {}
-  local function add(label, value) table.insert(lines, ns.highlight(label) .. '  ' .. tostring(value)) end
+  local function add(label, value) table.insert(lines, ns.highlight(label) .. ': ' .. tostring(value)) end
   if s.since then add('Remembering since', Util.formatDate(s.since)) end
   add('Deaths', s.deaths)
   if s.deadliest then add('Most deaths', s.deadliest.label .. ' (' .. s.deadliest.x .. ')') end
   add('Zones discovered', s.zones)
   add('Places discovered', s.subzones)
+  add('Areas discovered', s.areas)
   if s.mostVisited then add('Most visited place', s.mostVisited.label .. ' (' .. s.mostVisited.x .. ' visits)') end
   add('NPCs met', s.npcs)
   add('Conversations', s.talks)
@@ -302,7 +330,7 @@ function Queries.lines(tab, search, sort)
   end
   if tab == 'moments' then
     local lines = momentLines()
-    if #lines == 0 then lines = { 'No moments yet. Add one with /mem moment "Your moment"' } end
+    if #lines == 0 then lines = { 'No moments yet. Add one with /mem moment "Your moment".' } end
     return lines, #lines
   end
   if tab == 'here' then

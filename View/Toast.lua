@@ -12,24 +12,24 @@ local token = 0
 
 local function build()
   frame = CreateFrame('Frame', 'MemoryForeverToast', UIParent, 'BackdropTemplate')
-  frame:SetSize(380, 64)
+  frame:SetSize(420, 64)
   frame:SetPoint('TOP', UIParent, 'TOP', 0, -150)
   frame:SetFrameStrata('HIGH')
   frame:SetClampedToScreen(true)
   if frame.SetBackdrop then
     frame:SetBackdrop({
-      bgFile = 'Interface\\Tooltips\\UI-Tooltip-Background',
+      bgFile = 'Interface\\Buttons\\WHITE8X8',
       edgeFile = 'Interface\\Tooltips\\UI-Tooltip-Border',
-      tile = true, tileSize = 16, edgeSize = 16,
-      insets = { left = 4, right = 4, top = 4, bottom = 4 },
+      tile = true, tileSize = 8, edgeSize = 14,
+      insets = { left = 3, right = 3, top = 3, bottom = 3 },
     })
-    frame:SetBackdropColor(0.05, 0.05, 0.08, 0.9)
-    frame:SetBackdropBorderColor(1, 0.93, 0.47, 0.9)
+    frame:SetBackdropColor(0.07, 0.07, 0.07, 0.94)
+    frame:SetBackdropBorderColor(0.78, 0.64, 0.28, 0.95)
   end
 
   local icon = frame:CreateTexture(nil, 'ARTWORK')
   icon:SetSize(36, 36)
-  icon:SetPoint('LEFT', frame, 'LEFT', 12, 0)
+  icon:SetPoint('TOPLEFT', frame, 'TOPLEFT', 12, -14)
   icon:SetTexture('Interface\\Icons\\INV_Misc_Book_09')
 
   title = frame:CreateFontString(nil, 'OVERLAY', 'GameFontNormal')
@@ -39,9 +39,11 @@ local function build()
 
   body = frame:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
   body:SetPoint('TOPLEFT', title, 'BOTTOMLEFT', 0, -4)
-  body:SetPoint('RIGHT', frame, 'RIGHT', -12, 0)
+  body:SetWidth(348)
   body:SetJustifyH('LEFT')
   body:SetJustifyV('TOP')
+  if body.SetWordWrap then body:SetWordWrap(true) end
+  if body.SetSpacing then body:SetSpacing(2) end
 
   frame:EnableMouse(true)
   frame:SetScript('OnMouseUp', function(self) self:Hide() end)
@@ -60,8 +62,11 @@ function Toast.show(heading, text, duration)
 
   title:SetText(heading or ns.NAME)
   body:SetText(text or '')
-  local height = 40 + (body.GetStringHeight and body:GetStringHeight() or 14)
-  frame:SetHeight(math.max(64, height))
+  local bodyHeight = (body.GetStringHeight and body:GetStringHeight()) or 14
+  frame:SetHeight(math.max(64, 52 + bodyHeight))
+  if not duration then
+    duration = math.min(14, 6 + math.floor(#(text or '') / 40))
+  end
   frame:SetAlpha(1)
   frame:Show()
 

@@ -25,6 +25,21 @@ describe('Formatter', function()
     H.contains(F.firstWithDays(m, verbs), '41 days ago')
   end)
 
+  it('omits a real moment when it is the current one', function()
+    local fresh = WoW.start()
+    fresh.ns.Moments.add('Leveling with Sam')
+    local m = fresh.ns.Memory.new('npcs', { 'Marshal Dughan' }, 'talk', {
+      first = '26-10-02|5|Elwynn Forest|Goldshire|1',
+      last = '26-11-11|9|Elwynn Forest|Goldshire|1',
+      x = 4,
+    })
+    local text = fresh.ns.Formatter.firstWithDate(m, verbs)
+    H.notContains(text, 'Leveling with Sam')
+    H.notContains(text, '~')
+    fresh.ns.Moments.add('Now')
+    H.contains(fresh.ns.Formatter.firstWithDate(m, verbs), '~Leveling with Sam~')
+  end)
+
   it('omits level and moment when they match now, and location for visits', function()
     local m = memory('26-11-12|10|Elwynn Forest|Goldshire|0', '26-11-12|10|Elwynn Forest|Goldshire|0', 1, 'visit')
     local text = F.lastWithDays(m, verbs)
@@ -46,7 +61,7 @@ describe('Formatter', function()
   it('handles actions without a subject (deaths)', function()
     local m = ns.Memory.new('misc', { 'others' }, 'die', { first = '26-11-10|9|-|-|-', last = '26-11-11|9|-|-|-', x = 2 })
     local deathVerbs = { past = 'died', present = 'die' }
-    H.eq(F.count(m, deathVerbs, 1), 'This is the 3rd time I die')
+    H.eq(F.count(m, deathVerbs, 1), 'This is the 3rd time I die.')
     H.contains(F.firstWithDays(m, deathVerbs), 'The first time I died was 2 days ago')
   end)
 end)

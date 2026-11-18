@@ -81,7 +81,7 @@ describe('Zone visits', function()
     H.eq(#shown, 1)
     H.contains(shown[1], 'Goldshire')
     H.contains(shown[1], "You've been here 2 times")
-    H.contains(shown[1], 'You died here 1 time')
+    H.contains(shown[1], 'You have died here 1 time.')
 
     -- same place again before the cooldown: no pop-up
     ctl.advance(400)

@@ -27,7 +27,7 @@ describe('Loading through the Forever TOC', function()
     H.noErrors(ctl)
     H.truthy(ctl.ns.Repository.isReady())
     H.contains(ctl.chatText(), 'loaded')
-    H.eq(ctl.env.MemoryForeverDB.schemaVersion, 2)
+    H.eq(ctl.env.MemoryForeverDB.schemaVersion, 3)
   end)
 
   it('creates no globals beyond its SavedVariables, slash command and named frames', function()

@@ -65,25 +65,25 @@ end
 function Formatter.firstWithDate(memory, verbs)
   if not memory:hasFirst() then return Formatter.count(memory, verbs, 1) end
   return 'The first time I ' .. pastPhrase(verbs) .. ' was on '
-    .. ns.Util.formatDate(memory.first.date) .. Formatter.details(memory, memory.first)
+    .. ns.Util.formatDate(memory.first.date) .. Formatter.details(memory, memory.first) .. '.'
 end
 
 function Formatter.firstWithDays(memory, verbs)
   if not memory:hasFirst() then return Formatter.count(memory, verbs, 1) end
   return 'The first time I ' .. pastPhrase(verbs) .. ' was '
-    .. daysText(memory:daysSinceFirst()) .. Formatter.details(memory, memory.first)
+    .. daysText(memory:daysSinceFirst()) .. Formatter.details(memory, memory.first) .. '.'
 end
 
 function Formatter.lastWithDate(memory, verbs)
   if not memory:hasLast() then return Formatter.count(memory, verbs, 1) end
   return 'The last time I ' .. pastPhrase(verbs) .. ' was on '
-    .. ns.Util.formatDate(memory.last.date) .. Formatter.details(memory, memory.last)
+    .. ns.Util.formatDate(memory.last.date) .. Formatter.details(memory, memory.last) .. '.'
 end
 
 function Formatter.lastWithDays(memory, verbs)
   if not memory:hasLast() then return Formatter.count(memory, verbs, 1) end
   return 'The last time I ' .. pastPhrase(verbs) .. ' was '
-    .. daysText(memory:daysSinceLast()) .. Formatter.details(memory, memory.last)
+    .. daysText(memory:daysSinceLast()) .. Formatter.details(memory, memory.last) .. '.'
 end
 
 --[[
@@ -91,7 +91,7 @@ end
 ]]
 function Formatter.count(memory, verbs, add)
   local times = (memory and memory.x or 0) + (add or 1)
-  return 'This is the ' .. ns.Util.ordinal(times) .. ' time I ' .. presentPhrase(verbs)
+  return 'This is the ' .. ns.Util.ordinal(times) .. ' time I ' .. presentPhrase(verbs) .. '.'
 end
 
 Formatter.TYPES = { 'firstWithDate', 'firstWithDays', 'lastWithDate', 'lastWithDays', 'count' }

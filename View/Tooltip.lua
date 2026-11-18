@@ -16,13 +16,13 @@ local Safe = ns.Safe
 
 Tooltip.LABELS = {
   talk = 'Talked', business = 'Business', fight = 'Fought', quest = 'Quests turned in',
-  party = 'Grouped', loot = 'Looted', visit = 'Visited', die = 'Died',
+  party = 'Grouped', loot = 'Looted', visit = 'Visited', die = 'Died', equip = 'Equipped',
 }
 
 local function stamp(snapshot)
   if not snapshot then return '-' end
   local text = ns.Util.formatDate(snapshot.date, true)
-  if snapshot.level then text = text .. ' [' .. snapshot.level .. ']' end
+  if snapshot.level then text = text .. ', level ' .. snapshot.level end
   return text
 end
 
@@ -32,7 +32,7 @@ function Tooltip.addMemories(tooltip, memories)
   tooltip:AddLine(ns.highlight(ns.NAME))
   for _, memory in ipairs(memories) do
     local label = Tooltip.LABELS[memory.interaction] or ns.Util.ucfirst(memory.interaction)
-    tooltip:AddDoubleLine(label, 'x' .. memory.x, 1, 1, 1, 1, 1, 1)
+    tooltip:AddDoubleLine(label, ns.Util.plural(memory.x, 'time'), 1, 1, 1, 1, 1, 1)
     if memory.x == 1 then
       tooltip:AddDoubleLine('    When', stamp(memory.first))
     else

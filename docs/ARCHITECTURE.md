@@ -1,9 +1,11 @@
 # Architecture
 
+Memory Forever is Jacob Rozell's WoW: Forever addon. It started from Adriano Castro's Memory 1.6.0 ([github.com/adrianocastro189/memory](https://github.com/adrianocastro189/memory)), which he paused in November 2024.
+
 This document has two parts:
 
-1. **Upstream Memory 1.6.0**: what the original addon looked like (tag `upstream-1.6.0`), why it can't run on WoW: Forever, and corrections to the assumptions in the porting handoff.
-2. **Memory Forever 2.0**: how the port is built.
+1. **Memory 1.6.0**: what Adriano's addon looked like (tag `upstream-1.6.0`), and why that code can't run on WoW: Forever.
+2. **Memory Forever**: how this addon is built.
 
 ---
 
@@ -75,7 +77,7 @@ MemoryAddon_Settings = { moments = { ... }, ['memory.printChance'] = '0.2', ... 
 
 ---
 
-## 2. Memory Forever 2.0
+## 2. Memory Forever
 
 ### Decisions
 

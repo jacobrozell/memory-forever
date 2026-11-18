@@ -42,6 +42,50 @@ function Group.members()
   return names
 end
 
+--[[
+The first Skyborne in a group, and the first of a class-and-race pair that
+did not exist in original WoW. Said once per pair.
+]]
+function Group.noteFaces()
+  if not ns.Forever or Safe.api('InCombatLockdown') then return end
+  local units = {}
+  if Safe.api('IsInRaid') then
+    local count = tonumber(Safe.api('GetNumGroupMembers')) or 0
+    for i = 1, count do table.insert(units, 'raid' .. i) end
+  else
+    local count = tonumber(Safe.api('GetNumSubgroupMembers')) or ((tonumber(Safe.api('GetNumGroupMembers')) or 1) - 1)
+    for i = 1, count do table.insert(units, 'party' .. i) end
+  end
+  for _, unit in ipairs(units) do
+    local guid = Safe.unitGUID(unit)
+    if guid and Safe.isPlayerGuid(guid) and Safe.api('UnitIsUnit', unit, 'player') ~= true then
+      local raceName, raceFile = ns.Safe.call(UnitRace, unit)
+      local _, classFile = ns.Safe.call(UnitClass, unit)
+      raceName = Safe.str(raceName)
+      raceFile = Safe.str(raceFile) or raceName
+      classFile = Safe.str(classFile)
+      local skyborne = raceFile == 'Skyborne'
+      if not skyborne and raceName then
+        skyborne = string.find(string.lower(raceName), 'skyborne', 1, true) ~= nil
+      end
+      if skyborne then
+        local previous = ns.record({
+          category = 'misc', path = { 'people', 'Skyborne' }, interaction = 'meet', quiet = true,
+          verbs = { past = 'grouped', pastConnector = 'with', present = 'group', presentConnector = 'with', subject = 'Skyborne' },
+        })
+        if previous.x < 1 then ns.Forever.say('This is the first Skyborne you have grouped with.') end
+      elseif raceFile and classFile and ns.Forever.unusual[raceFile] and ns.Forever.unusual[raceFile][classFile] then
+        local label = string.lower(raceName or raceFile) .. ' ' .. string.lower(classFile)
+        local previous = ns.record({
+          category = 'misc', path = { 'people', label }, interaction = 'meet', quiet = true,
+          verbs = { past = 'grouped', pastConnector = 'with', present = 'group', presentConnector = 'with', subject = label },
+        })
+        if previous.x < 1 then ns.Forever.say('This is the first ' .. label .. ' you have grouped with.') end
+      end
+    end
+  end
+end
+
 local function union(first, second)
   local names, seen = {}, {}
   for i = 1, 2 do
@@ -80,6 +124,7 @@ function Group.update()
       })
     end
   end
+  Group.noteFaces()
 end
 
 ns.Trackers.register('group', {

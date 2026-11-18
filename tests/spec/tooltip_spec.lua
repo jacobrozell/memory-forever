@@ -14,8 +14,8 @@ describe('Tooltips', function()
     ctl.units.target = ctl.units.npc
     local lines = ctl.showUnitTooltip('target')
     H.contains(lines, 'Memory Forever')
-    H.contains(lines, 'Talked | x1')
-    H.contains(lines, 'When | Nov 12, 2026 [10]')
+    H.contains(lines, 'Talked | 1 time')
+    H.contains(lines, 'When | Nov 12, 2026, level 10')
   end)
 
   it('shows player memories keyed by name and realm', function()
@@ -24,7 +24,7 @@ describe('Tooltips', function()
     ctl.units.party1 = { guid = 'Player-1-00000002', name = 'Sam' }
     ctl.event('GROUP_ROSTER_UPDATE')
     ctl.units.mouseover = ctl.units.party1
-    H.contains(ctl.showUnitTooltip('mouseover'), 'Grouped | x1')
+    H.contains(ctl.showUnitTooltip('mouseover'), 'Grouped | 1 time')
   end)
 
   it('shows item memories', function()
@@ -33,7 +33,7 @@ describe('Tooltips', function()
     ctl.advanceDays(3)
     ctl.event('CHAT_MSG_LOOT', 'You receive loot: |cffffffff|Hitem:2589::|h[Linen Cloth]|h|r.', 'Tester')
     local lines = ctl.showItemTooltip('Linen Cloth', 2589)
-    H.contains(lines, 'Looted | x3')
+    H.contains(lines, 'Looted | 3 times')
     H.contains(lines, 'First | Nov 12, 2026')
     H.contains(lines, 'Last | Nov 15, 2026')
   end)

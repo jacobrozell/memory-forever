@@ -44,17 +44,19 @@ local function restOf(line, command)
 end
 
 local HELP = {
-  { '', 'open the journal' },
-  { 'here', 'what happened in this place' },
-  { 'stats', 'totals: deaths, places, most visited...' },
-  { 'moment "label"', 'start a new moment (alias: addm)' },
-  { 'moment', 'show the current moment (alias: getm)' },
-  { 'options', 'open the options panel' },
-  { 'settings', 'list settings and their values' },
-  { 'set <key> <value>', 'change a setting' },
-  { 'get <key>', 'show a setting' },
-  { 'status', 'version and which memory types are active' },
-  { 'toast', 'show a sample pop-up' },
+  { '', 'Open the journal.' },
+  { 'here', 'What happened in this place.' },
+  { 'stats', 'Totals: deaths, places, most visited.' },
+  { 'moment "label"', 'Set this character\'s moment. Alias: addm.' },
+  { 'moment', 'Show this character\'s moment. Alias: getm.' },
+  { 'moment off', 'Stop attaching a moment on this character.' },
+  { 'options', 'Open the options panel.' },
+  { 'settings', 'List settings and their values.' },
+  { 'set <key> <value>', 'Change a setting.' },
+  { 'get <key>', 'Show a setting.' },
+  { 'status', 'Version, and which memory types are on.' },
+  { 'toast', 'Show a sample pop-up.' },
+  { 'buffs', 'List your buffs, to check camp feature names.' },
 }
 
 local function printHelp()
@@ -106,8 +108,14 @@ handlers.moment = function(tokens, line)
     if current then
       ns.print('Current moment: ' .. ns.highlight(current))
     else
-      ns.print('No moment yet. Start one with /mem moment "Your moment here"')
+      ns.print('No moment on this character. Start one with /mem moment "Your moment here".')
     end
+    return
+  end
+  local lower = string.lower(label)
+  if lower == 'off' or lower == 'clear' or lower == 'none' then
+    ns.Moments.clear()
+    ns.print('This character has no current moment.')
     return
   end
   ns.Moments.add(label)
@@ -115,7 +123,7 @@ handlers.moment = function(tokens, line)
 end
 handlers.addm = function(tokens, line)
   if restOf(line) == '' then
-    ns.print('Please provide a moment, for example /mem moment "Leveling with Sam"')
+    ns.print('Please provide a moment, for example /mem moment "Leveling with Sam".')
     return
   end
   handlers.moment(tokens, line)
@@ -170,8 +178,17 @@ handlers.status = function()
   ns.print('  Tooltips: ' .. tostring(ns.Tooltip.installed or 'unavailable'))
 end
 
+handlers.buffs = function()
+  local names = ns.Camps and ns.Camps.listBuffs and ns.Camps.listBuffs() or {}
+  if #names == 0 then
+    ns.print('No buffs found. Auras may be hidden right now.')
+    return
+  end
+  ns.print('Buffs: ' .. table.concat(names, ', ') .. '.')
+end
+
 handlers.toast = function()
-  ns.Toast.show('Goldshire', "You've been here 7 times. Last visit: 3 days ago. You died here 2 times.")
+  ns.Toast.show('Goldshire', "You've been here 7 times. Your first visit was at level 10. Your last visit was 3 days ago. You have spent 2 hours here. You have turned in 4 quests here. You have died here 2 times.")
 end
 
 handlers.debug = function(tokens)

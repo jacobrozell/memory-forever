@@ -15,7 +15,7 @@ Settings.DEFINITIONS = {
   reminderStyle           = { type = 'enum', default = 'chat', values = { 'chat', 'toast', 'both', 'off' },
                               label = 'Where random reminders appear: chat, toast, both or off' },
   placeToasts             = { type = 'bool', default = true,
-                              label = 'Pop-up when you return to a place or die where you died before' },
+                              label = 'Story pop-ups for places, deaths, runs, gear, and campfires' },
   placeToastCooldown      = { type = 'number', default = 30, min = 0, max = 1440,
                               label = 'Minutes before the same place can pop up again' },
   showInTooltips          = { type = 'bool', default = true,

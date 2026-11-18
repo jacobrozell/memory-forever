@@ -4,6 +4,7 @@ ignore:
   - tests
   - docs
   - resources
+  - ongoing
   - .github
   - .venv
   - requirements-dev.txt

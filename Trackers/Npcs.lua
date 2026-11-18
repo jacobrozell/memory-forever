@@ -54,6 +54,10 @@ local function recordInteraction(name, interaction, dedupe)
   local verbs = ns.Util.copy(VERBS[interaction])
   verbs.subject = name
   ns.record({ category = 'npcs', path = { name }, interaction = interaction, verbs = verbs })
+  if interaction == 'quest' then
+    local zone, subZone = ns.Zones.location()
+    if zone then ns.Repository.addPlaceQuests(zone, subZone, 1) end
+  end
 end
 
 ns.Trackers.register('npcs', {

@@ -27,7 +27,7 @@ describe('SavedVariables', function()
   it('creates a fresh schema-2 database', function()
     local ctl = WoW.start()
     local db = ctl.env.MemoryForeverDB
-    H.eq(db.schemaVersion, 2)
+    H.eq(db.schemaVersion, 3)
     H.eq(type(db.settings), 'table')
     H.eq(type(db.moments), 'table')
     H.truthy(ctl.char())
@@ -42,6 +42,8 @@ describe('SavedVariables', function()
     H.eq(char.zones['Elwynn Forest'].subzones.Goldshire.visit.x >= 12, true)
     H.eq(char.levels[2].subZone, 'Northshire')
     H.eq(ctl.env.MemoryForeverDB.moments[1], 'Leveling with Sam')
+    H.eq(ctl.char().currentMoment, 1)
+    H.eq(ctl.ns.Moments.current(), 'Leveling with Sam')
     H.eq(ctl.ns.Settings.get('printChance'), 0.5)
     H.eq(ctl.ns.Settings.get('showInTooltips'), false)
     H.eq(ctl.env.MemoryAddon_DataSet, nil, 'legacy variable cleared after import')
@@ -68,7 +70,7 @@ describe('SavedVariables', function()
       } } },
     } } })
     H.noErrors(ctl)
-    H.eq(ctl.env.MemoryForeverDB.schemaVersion, 2)
+    H.eq(ctl.env.MemoryForeverDB.schemaVersion, 3)
     H.eq(ctl.char().npcs.Bob.talk.x, 2)
   end)
 
@@ -109,6 +111,30 @@ describe('SavedVariables', function()
     local db = ctl.env.MemoryForeverDB
     H.eq(type(db.realms), 'table')
     H.eq(db.moments[1], '1')
+  end)
+
+  it('keeps an existing account moment current for characters already saved', function()
+    local ctl = WoW.start({ saved = { MemoryForeverDB = {
+      schemaVersion = 2,
+      moments = { 'Leveling with Sam' },
+      settings = {},
+      realms = { ['Forever Realm'] = { ['Player-1-00000001'] = { npcs = {} } } },
+    } } })
+    H.noErrors(ctl)
+    H.eq(ctl.env.MemoryForeverDB.schemaVersion, 3)
+    H.eq(ctl.ns.Moments.current(), 'Leveling with Sam')
+  end)
+
+  it('does not copy the current moment onto another character', function()
+    local ctl = WoW.start()
+    ctl.ns.Moments.add('On Tester')
+    ctl.ns.Repository.bind('Forever Realm', 'Player-9-ALT', 'Alt', 'MAGE')
+    H.eq(ctl.ns.Moments.current(), nil)
+    ctl.ns.Moments.add('On Alt')
+    local realm = ctl.env.MemoryForeverDB.realms['Forever Realm']
+    H.eq(realm['Player-1-00000001'].currentMoment, 1)
+    H.eq(realm['Player-9-ALT'].currentMoment, 2)
+    H.eq(ctl.ns.Moments.current(), 'On Alt')
   end)
 
   it('only saves plain values (no secrets or functions)', function()
