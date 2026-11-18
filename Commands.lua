@@ -54,7 +54,7 @@ local HELP = {
   { 'settings', 'List settings and their values.' },
   { 'set <key> <value>', 'Change a setting.' },
   { 'get <key>', 'Show a setting.' },
-  { 'status', 'Version, and which memory types are on.' },
+  { 'status', 'Version, client build, and which memory types are on.' },
   { 'toast', 'Show a sample pop-up.' },
   { 'buffs', 'List your buffs, to check camp feature names.' },
 }
@@ -171,6 +171,7 @@ handlers.config = handlers.options
 
 handlers.status = function()
   ns.print('Version ' .. ns.VERSION .. ', data schema ' .. tostring(ns.db and ns.db.schemaVersion))
+  if ns.Client then ns.print('  ' .. ns.Client.summary()) end
   for _, tracker in ipairs(ns.Trackers.list()) do
     local state = tracker.status == 'on' and ns.highlight('on', '33ff33') or ns.highlight(tracker.status, 'ff6666')
     ns.print('  ' .. tracker.label .. ': ' .. state)

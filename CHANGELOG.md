@@ -2,7 +2,7 @@
 
 All notable changes to Memory Forever, by Jacob Rozell. Releases follow [semver](https://semver.org/). History from Adriano Castro's Memory, through 1.6.0, is in the `upstream-1.6.0` tag and earlier tags.
 
-## [2.0.0-alpha.2] - unreleased
+## [2.0.0-beta.1] - unreleased
 
 ### Changed
 - The current moment belongs to the character. Existing characters keep the moment that was current for the whole account. `/mem moment off` clears it.
@@ -20,12 +20,21 @@ All notable changes to Memory Forever, by Jacob Rozell. Releases follow [semver]
 - Level 25, 45, and 60, and crafting skill 150, 225, and 300, are called out as Legacy milestones. The skill you already have at login is not.
 - The first Skyborne you group with, and the first human hunter, dwarf shaman, gnome priest, orc mage, troll warlock, or undead paladin.
 - Each area the client announces as discovered. Coming back to a zone says how many areas you have found there.
+- The first login after a Forever build or interface change says the old build, the new build, and that this version was checked on build 70009. `/mem status` shows the client build.
+- A second saved copy, `MemoryForeverDB_Backup`. A missing character or a missing count is restored from it. A schema update runs on a copy and is kept only when it finishes.
+- Saved data is loaded before the addon (`LoadSavedVariablesFirst`), so a late load cannot replace the file with an empty database.
+
+### Fixed
+- The first time a level is stored is kept when `PLAYER_LEVEL_UP` fires again.
+- A memory slot that already holds something else is left alone. A broken count on a real memory is repaired.
+- A value the client cannot save is removed before writing, so one bad value cannot discard the saved file.
 
 ### Waiting on a client check
 - A Hardcore death as one quiet line, once the ruleset is visible to addons.
 
 ### Tested
-- 2026-11-18 08:48 CT. The stub suite is 141 passed. `tests/cover.py` measures 95.7% of the addon lines (2,308 of 2,411). Blank lines, comments, and closing braces are not counted.
+- Checked on Forever build 70009.
+- Stub suite: 150 passed.
 
 ## [2.0.0-alpha.1] - 2026-11-17
 

@@ -1,9 +1,10 @@
 ## Interface: 16001
-## Title: Memory Forever |cffffee772.0.0-alpha.1|r
+## Title: Memory Forever |cffffee772.0.0-beta.1|r
 ## Notes: Remembers what you do in the world and reminds you of it. By Jacob Rozell, based on Memory by Adriano Castro.
 ## Author: Jacob Rozell
-## Version: 2.0.0-alpha.1
-## SavedVariables: MemoryForeverDB, MemoryAddon_DataSet, MemoryAddon_Settings
+## Version: 2.0.0-beta.1
+## SavedVariables: MemoryForeverDB, MemoryForeverDB_Backup, MemoryAddon_DataSet, MemoryAddon_Settings
+## LoadSavedVariablesFirst: 1
 ## IconTexture: Interface\Icons\INV_Misc_Book_09
 ## AddonCompartmentFunc: MemoryForever_OnAddonCompartmentClick
 ## X-License: GPL-3.0-or-later
@@ -13,6 +14,7 @@ Core\Namespace.lua
 Core\Safe.lua
 Core\Util.lua
 Core\Events.lua
+Core\Client.lua
 
 Data\Settings.lua
 Data\DB.lua

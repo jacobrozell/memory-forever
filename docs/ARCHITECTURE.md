@@ -124,11 +124,11 @@ game event ──► Events (pcall per handler)
 Zones/Deaths additionally call Reminders.placeReturn / placeDeath (place pop-ups)
 ```
 
-### SavedVariables (schema 2)
+### SavedVariables (schema 3)
 
 ```
 MemoryForeverDB = {
-  schemaVersion = 2,
+  schemaVersion = 3,
   settings = { printChance = 0.2, reminderStyle = 'chat', placeToasts = true, ... },
   moments  = { 'label', ... },
   realms   = { [realm] = { [playerGUID] = {
@@ -146,7 +146,9 @@ MemoryForeverDB = {
 
 `MemoryAddon_DataSet` and `MemoryAddon_Settings` are also declared in the TOC. They are empty unless the user copies the original addon's SavedVariables file (see README). The 0/1 → 2 migration imports them into an empty database and then clears them.
 
-Migrations live in `DB.MIGRATIONS[targetVersion]`. A database written by a newer schema is left untouched.
+Migrations live in `DB.MIGRATIONS[targetVersion]`. Each one runs on a copy and replaces the saved table only after it finishes. A database written by a newer schema is left untouched.
+
+`MemoryForeverDB_Backup` is the last copy that was at least as complete as the one before it. On load, a missing character or a higher count in that copy is written back. Logout refreshes the copy. An empty main file does not replace a copy that still has characters.
 
 ### Tests
 

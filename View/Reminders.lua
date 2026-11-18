@@ -53,12 +53,28 @@ Records a memory and runs the reminder logic. spec = {
 }. Returns the memory as it was before.
 ]]
 function ns.record(spec)
-  local previous = ns.Repository.get(spec.category, spec.path, spec.interaction)
-  local x = spec.x or 1
-  ns.Repository.store(spec.category, spec.path, spec.interaction, x)
-  ns.debug(spec.interaction .. ' -> ' .. spec.category .. ' / ' .. table.concat(spec.path, ' / '))
-  if not spec.quiet and spec.verbs then
-    Reminders.afterStore(previous, spec.verbs, x)
+  if type(spec) ~= 'table' or type(spec.category) ~= 'string' or type(spec.interaction) ~= 'string' then
+    return nil
+  end
+  if type(spec.path) ~= 'table' then spec.path = {} end
+  local readOk, previous = pcall(ns.Repository.get, spec.category, spec.path, spec.interaction)
+  if not readOk then
+    ns.Events.report(previous)
+    return nil
+  end
+  local writeOk, leaf = pcall(ns.Repository.store, spec.category, spec.path, spec.interaction, spec.x or 1)
+  if not writeOk then
+    ns.Events.report(leaf)
+    return previous
+  end
+  if leaf and not spec.quiet and spec.verbs then
+    local shown, err = pcall(Reminders.afterStore, previous, spec.verbs, spec.x or 1)
+    if not shown then ns.Events.report(err) end
+  end
+  if leaf then
+    pcall(function()
+      ns.debug(spec.interaction .. ' -> ' .. spec.category .. ' / ' .. table.concat(spec.path, ' / '))
+    end)
   end
   return previous
 end

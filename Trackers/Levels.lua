@@ -13,6 +13,11 @@ ns.Trackers.register('levels', {
       -- UnitLevel can still return the old level during this event
       local level = tonumber(ns.Safe.value(newLevel)) or tonumber(ns.Safe.api('UnitLevel', 'player'))
       if not level then return end
+      local char = ns.Repository.char()
+      local existing = char and type(char.levels) == 'table' and char.levels[level]
+      if type(existing) == 'table' and type(existing.date) == 'string' and existing.date ~= '' then
+        return
+      end
       local snapshot = ns.MemoryString.capture({ level = level })
       ns.Repository.storeLevel(level, snapshot)
       if ns.Settings.get('screenshotOnLevelUp') then

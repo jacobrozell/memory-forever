@@ -61,21 +61,33 @@ function Repository.node(category, path, interaction, create)
     local key = path[i]
     if key == nil then return nil end
     local nextNode = node[key]
-    -- never overwrite a stored memory with a path table
     if isLeaf(nextNode) then return nil end
-    if type(nextNode) ~= 'table' then
+    if nextNode == nil then
       if not create then return nil end
       nextNode = {}
       node[key] = nextNode
+    elseif type(nextNode) ~= 'table' then
+      return nil
     end
     node = nextNode
   end
   local leaf = node[interaction]
-  if not isLeaf(leaf) then
-    if not create then return nil end
-    leaf = { first = -1, last = -1, x = 0 }
-    node[interaction] = leaf
+  if isLeaf(leaf) then return leaf end
+  if type(leaf) == 'table' and (leaf.first ~= nil or leaf.last ~= nil) then
+    local count = tonumber(leaf.x)
+    if not count or count ~= count or count < 0 or count == math.huge then count = 0 end
+    leaf.x = count
+    return leaf
   end
+  -- a value already stored here is kept; this memory is skipped
+  if type(leaf) == 'table' then
+    if next(leaf) ~= nil then return nil end
+  elseif leaf ~= nil then
+    return nil
+  end
+  if not create then return nil end
+  leaf = { first = -1, last = -1, x = 0 }
+  node[interaction] = leaf
   return leaf
 end
 
@@ -96,7 +108,11 @@ function Repository.store(category, path, interaction, x, snapshot)
   local value = (snapshot or ns.MemoryString.capture()):toString()
   if not ns.MemoryString.parse(leaf.first) then leaf.first = value end
   leaf.last = value
-  leaf.x = leaf.x + (x or 1)
+  local count = tonumber(leaf.x)
+  local added = tonumber(x)
+  if not count or count ~= count or count == math.huge or count == -math.huge then count = 0 end
+  if not added or added ~= added or added == math.huge or added == -math.huge then added = 1 end
+  leaf.x = count + added
   return leaf
 end
 
@@ -216,6 +232,10 @@ function Repository.storeLevel(level, snapshot)
   if not current then return end
   level = tonumber(level)
   if not level then return end
+  local existing = current.levels[level]
+  if type(existing) == 'table' and type(existing.date) == 'string' and existing.date ~= '' then
+    return existing
+  end
   current.levels[level] = {
     date = snapshot.date,
     zone = snapshot.zone or '-',

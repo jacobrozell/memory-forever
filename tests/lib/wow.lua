@@ -288,6 +288,9 @@ function M.newClient(options)
   env.GetNumGroupMembers = function() return ctl.groupSize or 0 end
   env.GetNumSubgroupMembers = function() return math.max(0, (ctl.groupSize or 0) - 1) end
   env.GetRealmName = function() return ctl.realm end
+  env.GetBuildInfo = function()
+    return '0.0.1', ctl.build or '70009', 'Nov 18 2026', ctl.interface or 16001
+  end
   env.GetNormalizedRealmName = function() return (ctl.realm:gsub('%s', '')) end
   env.GetZoneText = function() return ctl.zone end
   env.GetSubZoneText = function() return ctl.subzone end

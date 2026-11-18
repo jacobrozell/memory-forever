@@ -18,7 +18,7 @@ If you want to support Adriano: https://github.com/sponsors/adrianocastro189
 
 If you want to support me: https://buymeacoffee.com/jacobrozelq?status=1
 
-> **Status: 2.0.0-alpha.1.** Checked on the live Forever client for load, reload, logout, zones, return pop-ups, open-world loot, item tooltips, vendors, fights, deaths, and the options panel. Dungeons, grouping, level-up screenshots, and quest turn-ins are not confirmed yet. Please report Lua errors (BugSack output) in the issues.
+> **Status: 2.0.0-beta.1.** Checked on the live Forever client for load, reload, logout, zones, return pop-ups, open-world loot, item tooltips, vendors, fights, deaths, and the options panel. Dungeons, grouping, level-up screenshots, and quest turn-ins are not confirmed yet. Please report Lua errors (BugSack output) in the issues.
 
 ## What it remembers
 
@@ -57,7 +57,7 @@ Memories also show in NPC, player and item tooltips.
 | `/mem options` | Options panel (also under Options > AddOns) |
 | `/mem settings` | List all settings |
 | `/mem set <key> <value>` / `/mem get <key>` | Change or read a setting |
-| `/mem status` | Version and which memory types are active on this client |
+| `/mem status` | Version, the Forever build, and which memory types are active on this client |
 | `/mem toast` | Show a sample pop-up |
 
 `/memoryforever` works as well. The minimap button opens the journal on left-click and the options on right-click, and you can drag it to move it.
@@ -95,11 +95,28 @@ Forever runs on the modern (Midnight-era) engine with its addon restrictions:
 - **Dungeon loot** is read from the loot window and your bags, because loot chat is hidden in instances. Items won later by roll are not counted there.
 - Achievements are recorded only if the client has them (`/mem status` shows it).
 
+## When Forever updates
+
+Memory Forever keeps saving on a build it has not been checked on. The first login after the client build or interface changes says so, and names the build this version was checked on (70009). `/mem status` shows the same any time.
+
+That line is the smoke. After it:
+
+- `/mem status` — anything that turned off is named
+- Cross a subzone
+- Loot one item in the open world and hover it
+- Buy or repair from a vendor
+- Fight one mob you have targeted
+- Die once, and confirm it counted once
+
+Memories are written to `MemoryForeverDB`, and a second copy is kept in `MemoryForeverDB_Backup`. If a character or a count is missing the next time the file loads, it is put back. A schema update that errors leaves the saved data on the previous schema. A level that was already recorded is not replaced when the level-up event fires again.
+
+An interface newer than 16001 can mark the addon out of date in the addon list. The addon still loads while the client allows out-of-date addons. The login line is how you see that the interface moved.
+
 ## Install
 
 1. Download the release and extract it so the folder is named `MemoryForever`.
 2. Put it in your Forever AddOns folder: `World of Warcraft/_forever_/Interface/AddOns/`.
-3. Log in. You should see `Memory Forever: 2.0.0-alpha.1 loaded` in chat.
+3. Log in. You should see `Memory Forever: 2.0.0-beta.1 loaded` in chat.
 
 ### Bringing memories from the original Memory addon
 

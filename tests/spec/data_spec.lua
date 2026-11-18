@@ -148,6 +148,105 @@ describe('SavedVariables', function()
     WoW.serialize(ctl.env.MemoryForeverDB)
     H.noErrors(ctl)
   end)
+
+  it('says when the Forever build changes, and only on the login that sees it', function()
+    local first = WoW.start()
+    H.notContains(first.chatText(), 'updated from build')
+    first.slash('status')
+    H.contains(first.chatText(), 'Forever build 70009, checked on this client.')
+    local second = WoW.start({ saved = first.saved(), configure = function(c) c.build = '70100' end })
+    H.contains(second.chatText(), 'updated from build 70009 to 70100')
+    H.contains(second.chatText(), 'has not been smoked')
+    H.contains(second.chatText(), 'Memories are still saved')
+    local third = WoW.start({ saved = second.saved(), configure = function(c) c.build = '70100' end })
+    H.notContains(third.chatText(), 'updated from build')
+    third.slash('status')
+    H.contains(third.chatText(), 'Forever build 70100')
+    H.contains(third.chatText(), 'not smoked on this client')
+  end)
+
+  it('says once when the first seen build is not the checked build', function()
+    local first = WoW.start({ configure = function(c) c.build = '70150' end })
+    H.contains(first.chatText(), 'This Forever client is build 70150')
+    H.contains(first.chatText(), 'has not been smoked')
+    local second = WoW.start({ saved = first.saved(), configure = function(c) c.build = '70150' end })
+    H.notContains(second.chatText(), 'has not been smoked')
+  end)
+
+  it('says when the interface changes on the checked build', function()
+    local first = WoW.start()
+    local second = WoW.start({ saved = first.saved(), configure = function(c) c.interface = 16002 end })
+    H.contains(second.chatText(), "interface changed from 16001 to 16002")
+    H.contains(second.chatText(), 'has not been smoked')
+  end)
+
+  it('restores a character the saved file lost', function()
+    local first = WoW.start()
+    first.moveTo('Elwynn Forest', 'Goldshire')
+    first.ns.DB.commit()
+    local saved = first.saved()
+    local guid = 'Player-1-00000001'
+    local kept = saved.MemoryForeverDB_Backup.realms['Forever Realm'][guid]
+    kept.zones['Elwynn Forest'].subzones.Goldshire.visit.x = 5
+    H.eq(kept.zones['Elwynn Forest'].subzones.Goldshire.visit.x, 5)
+    saved.MemoryForeverDB.realms['Forever Realm'][guid] = nil
+    local second = WoW.start({ saved = saved })
+    H.noErrors(second)
+    H.contains(second.chatText(), 'Restored memories that were missing')
+    H.eq(second.char().zones['Elwynn Forest'].subzones.Goldshire.visit.x >= 5, true)
+  end)
+
+  it('puts a lowered count back from the saved copy', function()
+    local first = WoW.start()
+    first.moveTo('Elwynn Forest', 'Goldshire')
+    first.ns.DB.commit()
+    local saved = first.saved()
+    local visit = saved.MemoryForeverDB.realms['Forever Realm']['Player-1-00000001'].zones['Elwynn Forest'].subzones.Goldshire.visit
+    local backupVisit = saved.MemoryForeverDB_Backup.realms['Forever Realm']['Player-1-00000001'].zones['Elwynn Forest'].subzones.Goldshire.visit
+    backupVisit.x = 5
+    visit.x = 0
+    local second = WoW.start({ saved = saved })
+    H.eq(second.char().zones['Elwynn Forest'].subzones.Goldshire.visit.x >= 5, true)
+  end)
+
+  it('restores the last copy when the saved file is not a table', function()
+    local first = WoW.start()
+    first.moveTo('Elwynn Forest', 'Goldshire')
+    first.ns.DB.commit()
+    local saved = first.saved()
+    saved.MemoryForeverDB_Backup.realms['Forever Realm']['Player-1-00000001'].zones['Elwynn Forest'].subzones.Goldshire.visit.x = 5
+    saved.MemoryForeverDB = 'garbage'
+    local second = WoW.start({ saved = saved })
+    H.noErrors(second)
+    H.contains(second.chatText(), 'Restored the last copy')
+    H.eq(second.char().zones['Elwynn Forest'].subzones.Goldshire.visit.x >= 5, true)
+  end)
+
+  it('does not advance the schema when a migration fails', function()
+    local ctl = WoW.start()
+    ctl.char().npcs.Bob = { talk = { first = '24-08-01|1|Elwynn Forest|Goldshire|0', last = '24-08-01|1|Elwynn Forest|Goldshire|0', x = 2 } }
+    ctl.env.MemoryForeverDB.schemaVersion = 2
+    local original = ctl.ns.DB.MIGRATIONS[3]
+    ctl.ns.DB.MIGRATIONS[3] = function() error('boom') end
+    ctl.ns.DB.init()
+    ctl.ns.DB.MIGRATIONS[3] = original
+    H.eq(ctl.env.MemoryForeverDB.schemaVersion, 2)
+    H.eq(ctl.char().npcs.Bob.talk.x, 2)
+    H.contains(ctl.ns.pendingNotices[1], 'Memories were left as they are')
+    H.noErrors(ctl)
+  end)
+
+  it('strips a value the client cannot save and keeps the memories', function()
+    local ctl = WoW.start()
+    ctl.moveTo('Elwynn Forest', 'Goldshire')
+    ctl.char().npcs.Bad = function() end
+    ctl.ns.DB.commit()
+    WoW.serialize(ctl.env.MemoryForeverDB)
+    WoW.serialize(ctl.env.MemoryForeverDB_Backup)
+    H.eq(ctl.char().npcs.Bad, nil)
+    H.eq(ctl.char().zones['Elwynn Forest'].subzones.Goldshire.visit.x >= 1, true)
+    H.noErrors(ctl)
+  end)
 end)
 
 describe('MemoryString', function()

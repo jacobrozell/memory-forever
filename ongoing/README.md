@@ -9,7 +9,7 @@ Plans and projects **in implementation** — approved, specced, and actively bei
 | Ship blockers / release train | review-fixes docs in this folder |
 | Shipped behavior | `CHANGELOG.md` |
 
-**Last updated:** 2026-11-18 08:48 CT. Stub suite 141 passed. Addon line coverage 95.7% (2,308 of 2,411) via `tests/cover.py`.
+**Last updated:** 2026-11-18. Stub suite 150 passed.
 
 ## Active
 

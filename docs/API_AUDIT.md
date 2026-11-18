@@ -57,6 +57,7 @@ Verdicts: ✅ works as-is · 🔁 swapped to a modern API · 🧱 redesigned · 
 | `issecretvalue` | – | ✅ new | `Safe.isSecret`. If the function is missing, nothing is treated as secret. |
 | `C_EventUtils.IsEventValid` | – | ✅ new | Event gating, plus a `pcall` around `RegisterEvent` |
 | `C_AddOns.GetAddOnMetadata` | – | 🔁 new | Version (falls back to `GetAddOnMetadata`) |
+| `GetBuildInfo` | – | ✅ new | Login note when the Forever build or interface changes. `/mem status` shows the build. |
 | `Settings.RegisterCanvasLayoutCategory`, `Settings.RegisterAddOnCategory`, `Settings.OpenToCategory` | – | ✅ new | Options panel. Falls back to `InterfaceOptions_AddCategory`. |
 | `SlashCmdList` | Library command system | 🔁 | Direct: `/mem`, `/memoryforever` |
 | `DEFAULT_CHAT_FRAME:AddMessage` | Output | ✅ | Same |
